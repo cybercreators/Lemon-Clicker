@@ -8,27 +8,27 @@ workflows:
       vars:
         XCODE_PROJECT: "LemonClicker.xcodeproj"
         XCODE_SCHEME: "LemonClicker"
-        BUNDLE_ID: "com.example.lemonclicker"
       
       ios_signing:
-        # This will use the files you upload to the Codemagic UI
+        # Removing strict bundle_identifier and distribution_type 
+        # to allow Codemagic to auto-detect the best matching uploaded profile.
+        # Ensure you have uploaded your .p12 and .mobileprovision in Team Settings.
         distribution_type: ad_hoc
-        bundle_identifier: com.example.lemonclicker
 
     scripts:
       - name: Set up code signing
         script: |
-          # This command fetches the certificates and profiles you uploaded to Codemagic
+          # Automatically fetch the best matching certificate and profile
           xcode-project use-profiles
         
       - name: Build and Package Signed IPA
         script: |
-          # Build for a real device and package into .ipa
+          # Build and package into .ipa
+          # The export-method will be inferred from the provisioning profile
           xcode-project build-ipa \
             --project "$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME" \
             --configuration Release \
-            --export-method ad-hoc \
             --output "build/ios/LemonClicker.ipa"
             
     artifacts:
