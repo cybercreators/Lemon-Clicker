@@ -1,0 +1,57 @@
+workflows:
+  ios-build:
+    name: iOS Build and Publish
+    # Use a powerful instance for faster builds
+    instance_type: mac_mini_m1
+    max_build_duration: 60
+    
+    environment:
+      vars:
+        # IMPORTANT: Replace with your actual Xcode project name and scheme
+        XCODE_PROJECT: "LemonClicker.xcodeproj"
+        XCODE_SCHEME: "LemonClicker"
+      
+      ios_signing:
+        # IMPORTANT: Replace with your actual bundle identifier
+        bundle_identifier: com.example.lemonclicker
+        # Options: app_store | ad_hoc | development | enterprise
+        distribution_type: app_store
+
+    scripts:
+      - name: Install dependencies (if any)
+        script: |
+          # Add any necessary dependency installation here (e.g., pod install)
+          echo "No dependencies to install for a basic Xcode project."
+          
+      - name: Set up code signing settings on Xcode project
+        script: xcode-project use-profiles
+        
+      - name: Build iOS App and generate IPA
+        script: |
+          # This command builds the .app and packages it into a signed .ipa
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME" \
+            --configuration "Release" \
+            --export-method "$CM_IOS_DISTRIBUTION_TYPE" \
+            --output "build/ios/LemonClicker.ipa"
+            
+    artifacts:
+      # The resulting IPA file
+      - build/ios/*.ipa
+      # Build logs for debugging
+      - /tmp/xcodebuild_log/*.log
+      
+    publishing:
+      # Publish to App Store Connect (TestFlight or App Store)
+      app_store_connect:
+        # IMPORTANT: This requires an App Store Connect API key to be set up in Codemagic
+        # The key name 'AppStoreConnect_API_Key' is a placeholder.
+        api_key: AppStoreConnect_API_Key
+        # Options: TestFlight | AppStore
+        targets:
+          - target: TestFlight
+            # Optional: Replace with your Apple ID if you want to submit for review
+            # apple_id: user@example.com
+            # Optional: Options: true | false
+            # submit_for_review: false
