@@ -18,40 +18,89 @@ workflows:
         distribution_type: app_store
 
     scripts:
-      - name: Install dependencies (if any)
+      - name: Install dependencies
         script: |
-          # Add any necessary dependency installation here (e.g., pod install)
-          echo "No dependencies to install for a basic Xcode project."
+          sudo gem install cocoapods
+          echo "Dependencies check complete"
           
-      - name: Set up code signing settings on Xcode project
+      - name: Set up code signing
         script: xcode-project use-profiles
         
-      - name: Build iOS App and generate IPA
+      - name: Build iOS App (.app)
         script: |
-          # This command builds the .app and packages it into a signed .ipa
+          xcodebuild build \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -derivedDataPath build \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_IDENTITY="iPhone Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="Lemon Clicker Distribution"
+            
+      - name: Package .app into .ipa
+        script: |
           xcode-project build-ipa \
             --project "$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME" \
-            --configuration "Release" \
-            --export-method "$CM_IOS_DISTRIBUTION_TYPE" \
+            --configuration Release \
+            --export-method app-store \
             --output "build/ios/LemonClicker.ipa"
             
+      - name: Verify IPA was created
+        script: |
+          if [ -f "build/ios/LemonClicker.ipa" ]; then
+            echo "✅ IPA successfully created!"
+            ls -lh build/ios/LemonClicker.ipa
+          else
+            echo "❌ IPA creation failed"
+            exit 1
+          fi
+            
     artifacts:
-      # The resulting IPA file
       - build/ios/*.ipa
-      # Build logs for debugging
       - /tmp/xcodebuild_log/*.log
+      - build/Release-iphoneos/*.app
       
     publishing:
-      # Publish to App Store Connect (TestFlight or App Store)
       app_store_connect:
-        # IMPORTANT: This requires an App Store Connect API key to be set up in Codemagic
-        # The key name 'AppStoreConnect_API_Key' is a placeholder.
-        api_key: AppStoreConnect_API_Key
-        # Options: TestFlight | AppStore
-        targets:
-          - target: TestFlight
-            # Optional: Replace with your Apple ID if you want to submit for review
-            # apple_id: user@example.com
-            # Optional: Options: true | false
-            # submit_for_review: false
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+      email:
+        recipients:
+          - $DEVELOPER_EMAIL
+        subject: "Lemon Clicker iOS Build Complete"
+        message: "Your IPA is ready!"
+      slack:
+        channel: $SLACK_CHANNEL
+        notify_on_build_start: true
+        notify_on_build_failure: true
+        notify_on_build_success: true
+
+  ios-build-adhoc:
+    name: iOS Build Ad-Hoc Distribution
+    instance_type: mac_mini_m1
+    max_build_duration: 120
+    
+    environment:
+      vars:
+        XCODE_PROJECT: "LemonClicker.xcodeproj"
+        XCODE_SCHEME: "LemonClicker"
+        
+      ios_signing:
+        distribution_type: ad_hoc
+        bundle_identifier: com.example.lemonclicker
+
+    scripts:
+      - name: Set up code signing
+        script: xcode-project use-profiles
+        
+      - name: Build Ad-Hoc IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME" \
+            --configuration Release \
+            --export-method ad-hoc \
+            --output "build/ios/LemonClicker-adhoc.ipa"
+
+    artifacts:
+      - build/ios/*.ipa

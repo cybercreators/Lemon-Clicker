@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lemon Clicker - Idle Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🍋 Lemon Clicker</h1>
+            <p class="subtitle">Click the lemon to earn points!</p>
+        </header>
+
+        <!-- Main Game Area -->
+        <main class="game-area">
+            <!-- Stats Display -->
+            <div class="stats-panel">
+                <div class="stat">
+                    <span class="stat-label">Lemons:</span>
+                    <span class="stat-value" id="lemonCount">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Per Second:</span>
+                    <span class="stat-value" id="perSecond">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Multiplier:</span>
+                    <span class="stat-value" id="multiplier">1x</span>
+                </div>
+            </div>
+
+            <!-- Clicker Button -->
+            <div class="clicker-section">
+                <button class="lemon-button" id="lemonButton">
+                    <span class="lemon-emoji">🍋</span>
+                </button>
+                <p class="click-feedback" id="clickFeedback"></p>
+            </div>
+
+            <!-- Shop Section -->
+            <div class="shop-section">
+                <h2>🏪 Shop</h2>
+                <div class="upgrades-grid">
+                    <!-- Upgrade: Cursor -->
+                    <div class="upgrade-card" id="upgrade-cursor">
+                        <div class="upgrade-header">
+                            <span class="upgrade-icon">🖱️</span>
+                            <h3>Better Cursor</h3>
+                        </div>
+                        <p class="upgrade-description">+1 lemon per click</p>
+                        <div class="upgrade-cost">
+                            <span class="cost-label">Cost:</span>
+                            <span class="cost-value" id="cost-cursor">10</span> 🍋
+                        </div>
+                        <button class="buy-button" data-upgrade="cursor">Buy</button>
+                        <p class="owned-count" id="owned-cursor">Owned: 0</p>
+                    </div>
+
+                    <!-- Upgrade: Farmer -->
+                    <div class="upgrade-card" id="upgrade-farmer">
+                        <div class="upgrade-header">
+                            <span class="upgrade-icon">👨‍🌾</span>
+                            <h3>Farmer</h3>
+                        </div>
+                        <p class="upgrade-description">+1 lemon per second</p>
+                        <div class="upgrade-cost">
+                            <span class="cost-label">Cost:</span>
+                            <span class="cost-value" id="cost-farmer">50</span> 🍋
+                        </div>
+                        <button class="buy-button" data-upgrade="farmer">Buy</button>
+                        <p class="owned-count" id="owned-farmer">Owned: 0</p>
+                    </div>
+
+                    <!-- Upgrade: Farm -->
+                    <div class="upgrade-card" id="upgrade-farm">
+                        <div class="upgrade-header">
+                            <span class="upgrade-icon">🌾</span>
+                            <h3>Lemon Farm</h3>
+                        </div>
+                        <p class="upgrade-description">+5 lemons per second</p>
+                        <div class="upgrade-cost">
+                            <span class="cost-label">Cost:</span>
+                            <span class="cost-value" id="cost-farm">500</span> 🍋
+                        </div>
+                        <button class="buy-button" data-upgrade="farm">Buy</button>
+                        <p class="owned-count" id="owned-farm">Owned: 0</p>
+                    </div>
+
+                    <!-- Upgrade: Orchard -->
+                    <div class="upgrade-card" id="upgrade-orchard">
+                        <div class="upgrade-header">
+                            <span class="upgrade-icon">🌳</span>
+                            <h3>Lemon Orchard</h3>
+                        </div>
+                        <p class="upgrade-description">+25 lemons per second</p>
+                        <div class="upgrade-cost">
+                            <span class="cost-label">Cost:</span>
+                            <span class="cost-value" id="cost-orchard">5000</span> 🍋
+                        </div>
+                        <button class="buy-button" data-upgrade="orchard">Buy</button>
+                        <p class="owned-count" id="owned-orchard">Owned: 0</p>
+                    </div>
+
+                    <!-- Upgrade: Factory -->
+                    <div class="upgrade-card" id="upgrade-factory">
+                        <div class="upgrade-header">
+                            <span class="upgrade-icon">🏭</span>
+                            <h3>Lemon Factory</h3>
+                        </div>
+                        <p class="upgrade-description">+100 lemons per second</p>
+                        <div class="upgrade-cost">
+                            <span class="cost-label">Cost:</span>
+                            <span class="cost-value" id="cost-factory">50000</span> 🍋
+                        </div>
+                        <button class="buy-button" data-upgrade="factory">Buy</button>
+                        <p class="owned-count" id="owned-factory">Owned: 0</p>
+                    </div>
+
+                    <!-- Upgrade: Multiplier -->
+                    <div class="upgrade-card premium" id="upgrade-multiplier">
+                        <div class="upgrade-header">
+                            <span class="upgrade-icon">⚡</span>
+                            <h3>Lemon Boost</h3>
+                        </div>
+                        <p class="upgrade-description">x2 production (stacks)</p>
+                        <div class="upgrade-cost">
+                            <span class="cost-label">Cost:</span>
+                            <span class="cost-value" id="cost-multiplier">1000</span> 🍋
+                        </div>
+                        <button class="buy-button" data-upgrade="multiplier">Buy</button>
+                        <p class="owned-count" id="owned-multiplier">Owned: 0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prestige Section -->
+            <div class="prestige-section">
+                <h2>✨ Prestige</h2>
+                <p class="prestige-description">Reset your progress to earn <strong id="prestigeGain">0</strong> Prestige Points and unlock permanent bonuses!</p>
+                <button class="prestige-button" id="prestigeButton">Prestige</button>
+                <p class="prestige-info">Current Prestige Points: <strong id="prestigePoints">0</strong></p>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <button class="reset-button" id="resetButton">Reset Game</button>
+            <p class="version">v1.0.0</p>
+        </footer>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
