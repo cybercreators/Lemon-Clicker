@@ -43,7 +43,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - $DEVELOPER_EMAIL
+          - user@example.com
       slack:
-        channel: $SLACK_CHANNEL
+        channel: "#general"
         notify_on_build_start: true
