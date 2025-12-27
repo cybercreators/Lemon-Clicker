@@ -10,10 +10,8 @@ workflows:
         XCODE_SCHEME: "LemonClicker"
       
       ios_signing:
-        # Removing strict bundle_identifier and distribution_type 
-        # to allow Codemagic to auto-detect the best matching uploaded profile.
-        # Ensure you have uploaded your .p12 and .mobileprovision in Team Settings.
         distribution_type: ad_hoc
+        bundle_identifier: com.example.lemonclicker
 
     scripts:
       - name: Set up code signing
