@@ -1,28 +1,20 @@
 workflows:
   ios-build:
-    name: iOS Build and Publish
-    # Use a powerful instance for faster builds
+    name: iOS Build
     instance_type: mac_mini_m1
-    max_build_duration: 60
+    max_build_duration: 120
     
     environment:
       vars:
-        # IMPORTANT: Replace with your actual Xcode project name and scheme
         XCODE_PROJECT: "LemonClicker.xcodeproj"
         XCODE_SCHEME: "LemonClicker"
+        BUNDLE_ID: "com.example.lemonclicker"
       
       ios_signing:
-        # IMPORTANT: Replace with your actual bundle identifier
+        distribution_type: ad_hoc
         bundle_identifier: com.example.lemonclicker
-        # Options: app_store | ad_hoc | development | enterprise
-        distribution_type: app_store
 
     scripts:
-      - name: Install dependencies
-        script: |
-          sudo gem install cocoapods
-          echo "Dependencies check complete"
-          
       - name: Set up code signing
         script: xcode-project use-profiles
         
@@ -33,9 +25,7 @@ workflows:
             -scheme "$XCODE_SCHEME" \
             -configuration Release \
             -derivedDataPath build \
-            -destination 'generic/platform=iOS' \
-            CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="Lemon Clicker Distribution"
+            -destination 'generic/platform=iOS'
             
       - name: Package .app into .ipa
         script: |
@@ -43,64 +33,17 @@ workflows:
             --project "$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME" \
             --configuration Release \
-            --export-method app-store \
+            --export-method ad-hoc \
             --output "build/ios/LemonClicker.ipa"
-            
-      - name: Verify IPA was created
-        script: |
-          if [ -f "build/ios/LemonClicker.ipa" ]; then
-            echo "✅ IPA successfully created!"
-            ls -lh build/ios/LemonClicker.ipa
-          else
-            echo "❌ IPA creation failed"
-            exit 1
-          fi
-            
+
     artifacts:
       - build/ios/*.ipa
       - /tmp/xcodebuild_log/*.log
-      - build/Release-iphoneos/*.app
       
     publishing:
-      app_store_connect:
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
       email:
         recipients:
           - $DEVELOPER_EMAIL
-        subject: "Lemon Clicker iOS Build Complete"
-        message: "Your IPA is ready!"
       slack:
         channel: $SLACK_CHANNEL
         notify_on_build_start: true
-        notify_on_build_failure: true
-        notify_on_build_success: true
-
-  ios-build-adhoc:
-    name: iOS Build Ad-Hoc Distribution
-    instance_type: mac_mini_m1
-    max_build_duration: 120
-    
-    environment:
-      vars:
-        XCODE_PROJECT: "LemonClicker.xcodeproj"
-        XCODE_SCHEME: "LemonClicker"
-        
-      ios_signing:
-        distribution_type: ad_hoc
-        bundle_identifier: com.example.lemonclicker
-
-    scripts:
-      - name: Set up code signing
-        script: xcode-project use-profiles
-        
-      - name: Build Ad-Hoc IPA
-        script: |
-          xcode-project build-ipa \
-            --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME" \
-            --configuration Release \
-            --export-method ad-hoc \
-            --output "build/ios/LemonClicker-adhoc.ipa"
-
-    artifacts:
-      - build/ios/*.ipa
