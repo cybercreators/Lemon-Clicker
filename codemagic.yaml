@@ -10,8 +10,8 @@ workflows:
         XCODE_SCHEME: "LemonClicker"
       
       ios_signing:
-        distribution_type: ad_hoc
-        bundle_identifier: com.example.lemonclicker
+        distribution_type: enterprise
+        bundle_identifier: com.viatris.myforceUAT
 
     scripts:
       - name: Set up code signing
