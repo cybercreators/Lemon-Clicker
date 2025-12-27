@@ -1,49 +1,39 @@
 workflows:
-  ios-build:
-    name: iOS Build
+  ios-unsigned-build:
+    name: iOS Unsigned Build
     instance_type: mac_mini_m1
-    max_build_duration: 120
+    max_build_duration: 60
     
     environment:
       vars:
         XCODE_PROJECT: "LemonClicker.xcodeproj"
         XCODE_SCHEME: "LemonClicker"
-        BUNDLE_ID: "com.example.lemonclicker"
-      
-      ios_signing:
-        distribution_type: ad_hoc
-        bundle_identifier: com.example.lemonclicker
 
     scripts:
-      - name: Set up code signing
-        script: xcode-project use-profiles
-        
-      - name: Build iOS App (.app)
+      - name: Build Unsigned iOS App
         script: |
+          # Build for the simulator to avoid signing requirements
           xcodebuild build \
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
             -configuration Release \
+            -sdk iphonesimulator \
             -derivedDataPath build \
-            -destination 'generic/platform=iOS'
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
             
-      - name: Package .app into .ipa
+      - name: Package .app into zip
         script: |
-          xcode-project build-ipa \
-            --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME" \
-            --configuration Release \
-            --export-method ad-hoc \
-            --output "build/ios/LemonClicker.ipa"
-
+          # Find the .app and zip it
+          cd build/Build/Products/Release-iphonesimulator
+          zip -r ../../../LemonClicker_Unsigned.zip LemonClicker.app
+          
     artifacts:
-      - build/ios/*.ipa
-      - /tmp/xcodebuild_log/*.log
+      - "*.zip"
+      - build/Build/Products/Release-iphonesimulator/*.app
       
     publishing:
       email:
         recipients:
           - user@example.com
-      slack:
-        channel: "#general"
-        notify_on_build_start: true
