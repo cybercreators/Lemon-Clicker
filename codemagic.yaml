@@ -16,15 +16,16 @@ workflows:
     scripts:
       - name: Set up code signing
         script: |
-          # Automatically fetch the best matching certificate and profile
+          # This will set up the keychain and install the profiles
           xcode-project use-profiles
         
       - name: Build and Package Signed IPA
         script: |
-          # Build and package into .ipa
+          # We use the environment variables set by 'use-profiles'
           xcode-project build-ipa \
             --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+            --scheme "$XCODE_SCHEME" \
+            --bundle-id "com.sinotruk.cnhtc.srm"
             
     artifacts:
       - build/ios/ipa/*.ipa
