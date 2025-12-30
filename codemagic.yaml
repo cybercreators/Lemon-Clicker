@@ -1,6 +1,6 @@
 workflows:
-  ios-unsigned-build:
-    name: iOS Unsigned Build
+  ios-unsigned-ipa:
+    name: iOS Unsigned IPA Build
     instance_type: mac_mini_m1
     max_build_duration: 60
     
@@ -23,15 +23,17 @@ workflows:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
             
-      - name: Package .app into zip
+      - name: Package into Unsigned IPA
         script: |
-          # Find the .app and zip it for easy download
-          cd build/Build/Products/Release-iphoneos
-          zip -r ../../../LemonClicker_Unsigned.zip LemonClicker.app
+          # Create the Payload directory structure required for an .ipa
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/LemonClicker.app Payload/
+          
+          # Zip the Payload folder and rename to .ipa
+          zip -r LemonClicker_Unsigned.ipa Payload
           
     artifacts:
-      - "*.zip"
-      - build/Build/Products/Release-iphoneos/*.app
+      - "*.ipa"
       
     publishing:
       email:
