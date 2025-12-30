@@ -9,6 +9,8 @@ workflows:
         XCODE_PROJECT: "LemonClicker.xcodeproj"
         XCODE_SCHEME: "LemonClicker"
         BUNDLE_ID: "com.sinotruk.cnhtc.srm"
+        TEAM_ID: "Y75T79946S"
+        PROFILE_NAME: "iOS Team Inhouse Provisioning Profile: com.sinotruk.cnhtc.srm"
       
       ios_signing:
         distribution_type: enterprise
@@ -22,11 +24,7 @@ workflows:
         
       - name: Build and Package Signed IPA
         script: |
-          # 1. Find the UUID of the installed provisioning profile
-          PROVISIONING_PROFILE_UUID=$(grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision | grep -io "[-A-Z0-9]\{36\}")
-          echo "Detected Provisioning Profile UUID: $PROVISIONING_PROFILE_UUID"
-
-          # 2. Create ExportOptions.plist using the detected UUID
+          # 1. Create ExportOptions.plist using verified details
           cat > ExportOptions.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -35,21 +33,21 @@ workflows:
               <key>method</key>
               <string>enterprise</string>
               <key>teamID</key>
-              <string>Y75T79946S</string>
+              <string>$TEAM_ID</string>
               <key>compileBitcode</key>
               <false/>
               <key>signingStyle</key>
               <string>manual</string>
               <key>provisioningProfiles</key>
               <dict>
-                  <key>com.sinotruk.cnhtc.srm</key>
-                  <string>$PROVISIONING_PROFILE_UUID</string>
+                  <key>$BUNDLE_ID</key>
+                  <string>$PROFILE_NAME</string>
               </dict>
           </dict>
           </plist>
           EOF
 
-          # 3. Build Archive using the UUID
+          # 2. Build Archive using verified details
           xcodebuild archive \
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
@@ -57,11 +55,11 @@ workflows:
             -configuration Release \
             -destination 'generic/platform=iOS' \
             CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM=Y75T79946S \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE="$PROVISIONING_PROFILE_UUID"
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME"
 
-          # 4. Export IPA
+          # 3. Export IPA
           xcodebuild -exportArchive \
             -archivePath build/LemonClicker.xcarchive \
             -exportOptionsPlist ExportOptions.plist \
