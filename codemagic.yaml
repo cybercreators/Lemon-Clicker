@@ -11,7 +11,7 @@ workflows:
       
       ios_signing:
         distribution_type: enterprise
-        bundle_identifier: com.viatris.myforceUAT
+        bundle_identifier: com.sinotruk.cnhtc.srm
 
     scripts:
       - name: Set up code signing
