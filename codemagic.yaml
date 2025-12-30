@@ -22,7 +22,11 @@ workflows:
         
       - name: Build and Package Signed IPA
         script: |
-          # Create ExportOptions.plist
+          # 1. Find the UUID of the installed provisioning profile
+          PROVISIONING_PROFILE_UUID=$(grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision | grep -io "[-A-Z0-9]\{36\}")
+          echo "Detected Provisioning Profile UUID: $PROVISIONING_PROFILE_UUID"
+
+          # 2. Create ExportOptions.plist using the detected UUID
           cat > ExportOptions.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -39,13 +43,13 @@ workflows:
               <key>provisioningProfiles</key>
               <dict>
                   <key>com.sinotruk.cnhtc.srm</key>
-                  <string>skibidi</string>
+                  <string>$PROVISIONING_PROFILE_UUID</string>
               </dict>
           </dict>
           </plist>
           EOF
 
-          # Build Archive
+          # 3. Build Archive using the UUID
           xcodebuild archive \
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
@@ -55,9 +59,9 @@ workflows:
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=Y75T79946S \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="skibidi"
+            PROVISIONING_PROFILE="$PROVISIONING_PROFILE_UUID"
 
-          # Export IPA
+          # 4. Export IPA
           xcodebuild -exportArchive \
             -archivePath build/LemonClicker.xcarchive \
             -exportOptionsPlist ExportOptions.plist \
