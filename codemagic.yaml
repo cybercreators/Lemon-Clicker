@@ -10,7 +10,6 @@ workflows:
         XCODE_SCHEME: "LemonClicker"
         BUNDLE_ID: "com.sinotruk.cnhtc.srm"
         TEAM_ID: "Y75T79946S"
-        PROFILE_NAME: "iOS Team Inhouse Provisioning Profile: com.sinotruk.cnhtc.srm"
       
       ios_signing:
         distribution_type: enterprise
@@ -24,7 +23,7 @@ workflows:
         
       - name: Build and Package Signed IPA
         script: |
-          # 1. Create ExportOptions.plist using verified details
+          # 1. Create ExportOptions.plist
           cat > ExportOptions.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -41,23 +40,24 @@ workflows:
               <key>provisioningProfiles</key>
               <dict>
                   <key>$BUNDLE_ID</key>
-                  <string>$PROFILE_NAME</string>
+                  <string>skibidi</string>
               </dict>
           </dict>
           </plist>
           EOF
 
-          # 2. Build Archive using verified details
+          # 2. Build Archive using a more flexible approach
+          # We set CODE_SIGN_STYLE to Automatic but provide the specific identity
+          # This often bypasses the "managed profile" error while still using your cert
           xcodebuild archive \
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
             -archivePath build/LemonClicker.xcarchive \
             -configuration Release \
             -destination 'generic/platform=iOS' \
-            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_STYLE=Automatic \
             DEVELOPMENT_TEAM="$TEAM_ID" \
-            CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME"
+            CODE_SIGN_IDENTITY="iPhone Distribution"
 
           # 3. Export IPA
           xcodebuild -exportArchive \
