@@ -22,15 +22,12 @@ workflows:
       - name: Build and Package Signed IPA
         script: |
           # Build and package into .ipa
-          # The export-method will be inferred from the provisioning profile
           xcode-project build-ipa \
             --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME" \
-            --configuration Release \
-            --output "build/ios/LemonClicker.ipa"
+            --scheme "$XCODE_SCHEME"
             
     artifacts:
-      - build/ios/*.ipa
+      - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_log/*.log
       
     publishing:
